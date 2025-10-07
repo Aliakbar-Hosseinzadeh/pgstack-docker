@@ -1,0 +1,30 @@
+services:
+  db:
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # Do NOT publish the DB port in prod
+    # Add runtime security & robustness
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    stop_grace_period: 60s
+    # turn on log rotation (already in base), consider lower limits in prod
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "5"
+    # Resource hints (Compose 'deploy' is for Swarm; use --compatibility if desired)
+    deploy:
+      resources:
+        limits:
+          cpus: "4.00"
+          memory: 2g
+        reservations:
+          cpus: "0.25"
+          memory: 1g
+    profiles: ["prod"]
+
+volumes:
+  db_data:

@@ -1,0 +1,47 @@
+services:
+  db:
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # Optional: expose Postgres to host for IDEs (DBeaver, psql, etc.)
+    ports:
+      - "5432:5432"
+    profiles: ["dev"]
+  pgadmin:
+    image: dpage/pgadmin4:${PGADMIN_VERSION:-latest}
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PORT:-8080}:80" 
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password
+      TZ: ${TZ:-UTC}
+      # pgAdmin expects Python literals
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'True'
+      PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: 10
+      PGADMIN_CONFIG_LOGIN_BANNER: "'Authorized use only.'"
+      GUNICORN_TIMEOUT: "60"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets:
+      - pgadmin_password
+    networks: [dbnet]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/misc/ping >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    profiles: ["dev"]
+
+volumes:
+  db_data:
+  pgadmin_data:
+
+secrets:
+  pgadmin_password:
+    file: ./secrets/pgadmin_password.txt

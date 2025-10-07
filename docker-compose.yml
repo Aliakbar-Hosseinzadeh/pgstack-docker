@@ -1,0 +1,38 @@
+# docker-compose.yml  (BASE)
+
+name: ${PROJECT_NAME:-pgstack}
+
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION:-18}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      TZ: ${TZ:-UTC}
+      # Applies only on first init of a NEW data volume:
+      POSTGRES_INITDB_ARGS: >-
+        --data-checksums --locale=en_US.utf8 --encoding=UTF8
+        --auth-host=scram-sha-256 --auth-local=scram-sha-256
+    secrets:
+      - postgres_password
+    networks: [dbnet]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  dbnet:
+    driver: bridge
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
