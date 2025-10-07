@@ -1,4 +1,4 @@
-# 🐘 **pgstack-docker**
+# 🐘 **[pgstack-docker](https://medium.com/@aliakbarhosseinzadeh/how-i-built-a-clean-and-safe-postgresql-pgadmin-stack-with-docker-compose-c038207f24b4)**
 
 A clean, secure, and environment-aware **PostgreSQL + pgAdmin** stack using **Docker Compose**, ready for development, testing, and production.
 It includes strong secrets management, health checks, and environment-specific overrides that make it simple to run safely in all stages.
