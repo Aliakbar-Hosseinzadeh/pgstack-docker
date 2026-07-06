@@ -1,7 +1,7 @@
 services:
   db:
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
     # Optional: expose Postgres to host for IDEs (DBeaver, psql, etc.)
     ports:
       - "5432:5432"
